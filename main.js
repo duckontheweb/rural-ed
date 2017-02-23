@@ -56,35 +56,69 @@ d3.selection.prototype.moveToBack = function() {
 
         const districtsLayer = createMap('#map', geojsonData.features, shadowFeatures.features, path);
         const colorFunction = styleDistricts(districtsLayer, initialVariable, color);
-        districtsLayer.on('mouseover', function () {
+        districtsLayer.on('mouseover', function (d) {
+
+          if (!d.isClicked) {
+            d3.select('#hover-tooltip')
+              .html(d.properties.lgname)
+              .style('opacity', 1)
+              .style('pointer-events', 'auto')
+              .style('left', `${d3.event.pageX + 10}px`)
+              .style('top', `${d3.event.pageY}px`);
+          }
+
           if (d3.select(this).classed('no-data')) { return; }
+
           d3.select(this).moveToFront();
+          d.defaultColor = d3.select(this).attr('fill')
           d3.select(this)
             .attr('fill', '#fbffb5');
-        }).on('mouseout', function () {
+        }).on('mousemove', function () {
+          d3.select('#hover-tooltip')
+            .style('left', `${d3.event.pageX + 10}px`)
+            .style('top', `${d3.event.pageY}px`);
+        }).on('mouseout', function (d) {
+          d3.select('#hover-tooltip')
+            .style('opacity', 0)
+            .style('pointer-events', 'none')
           d3.select(this).moveToBack();
-          d3.select(this).transition().attr('fill', colorFunction);
+          d3.select(this).attr('fill', d.defaultColor || 'lightgray  ');
         }).on('click', function (d) {
           if (d3.select(this).classed('no-data')) { return ;}
+          d.isClicked = true;
           const header = `<div class="tooltip-header"><div>${d.properties.lgname}</div> <div id="close-tooltip">&times;</div></div>`;
           const minorityVal = (100 * d.properties.per_minorities).toLocaleString('en', {maximumFractionDigits: 2});
           const frVal = (100 * d.properties.per_free_reduced).toLocaleString('en', {maximumFractionDigits: 2});
           const perMinorities = `<div class="tooltip-row"><div class="tooltip-label">Percent Minorities:</div><div class="tooltip-value">${minorityVal}%</div></div>`;
           const perFreeReduced = `<div class="tooltip-row"><div class="tooltip-label">Percent Free/Reduced Lunch:</div><div class="tooltip-value">${frVal}%</div></div>`;
           const ruralDesignation = `<div class="tooltip-row"><div class="tooltip-label">Rural Designation:</div><div class="tooltip-value">${d.properties.rural_des}</div></div>`
-          const tooltipContent = `<div>${header}${perMinorities}${perFreeReduced}${ruralDesignation}</div>`
+          const siteLink = `<div class="tooltip-row"><div class="tooltip-link"><a href="${d.properties.link}" target="_blank">Go to Site</a></div></div>`
+          const tooltipContent = `<div>${header}${perMinorities}${perFreeReduced}${ruralDesignation}${siteLink}</div>`
 
+          d3.select('#hover-tooltip')
+            .style('opacity', 0)
+            .style('pointer-events', 'none')
           d3.select('#tooltip')
             .html(tooltipContent)
-            .style('opacity', '1')
+
+          const yPosition = (d3.event.pageY + $('#tooltip').outerHeight()) > $(document).height() ? d3.event.pageY - $('#tooltip').outerHeight() : d3.event.pageY;
+          d3.select('#tooltip').style('opacity', '1')
             .style('pointer-events', 'auto')
             .style('left', `${d3.event.pageX + 10}px`)
-            .style('top', `${d3.event.pageY}px`);
+            .style('top', `${yPosition}px`);
+
+          // // Keep in window
+          // if ((d3.event.pageY + $('#tooltip').outerHeight()) > $(document).height()) {
+          //   d3.select('#tooltip')
+          //     .style('top', `${d3.event.pageY}px`);
+          // }
 
           $('#close-tooltip').click(() => {
             d3.select('#tooltip')
             .style('opacity', 0)
             .style('pointer-events', 'none');
+
+            d.isClicked = false;
           })
         });
 
@@ -110,7 +144,20 @@ function createMap(selector, backgroundFeatures, highlighFeatures, path) {
   const dataLayer = d3.select(selector).select('#data-layer');
   const backgroundLayer = d3.select(selector).select('#background-layer');
 
-  backgroundLayer.selectAll('path').data(backgroundFeatures).enter().append('path').attr('d', path).classed('background-district', true);
+  backgroundLayer.selectAll('path').data(backgroundFeatures).enter().append('path').attr('d', path).classed('background-district', true)
+  .on('mouseover', function (d) {
+    d3.select('#hover-tooltip')
+      .html(d.properties.lgname)
+      .style('opacity', 1)
+      .style('pointer-events', 'auto')
+      .style('left', `${d3.event.pageX + 10}px`)
+      .style('top', `${d3.event.pageY}px`);
+  })
+  .on('mousemove', function () {
+    d3.select('#tooltip')
+      .style('left', `${d3.event.pageX + 10}px`)
+      .style('top', `${d3.event.pageY}px`);
+  });
   return dataLayer.selectAll("path").data(highlighFeatures).enter().append("path").attr("d", path).classed('district', true);;
 }
 
@@ -123,7 +170,7 @@ function styleDistricts(districtsLayer, attribute, colorScale) {
     default:
       colorFunction = colorPercentage;
   }
-  districtsLayer.attr("fill", colorFunction).classed('no-data', d => (!d.properties[attribute] && d.properties[attribute] !== 0)).classed(attribute, true);
+  districtsLayer.attr("fill", colorFunction).classed('no-data', d => (!d.properties[attribute] && d.properties[attribute] !== 0)).attr('class', `district ${attribute}`);
 
   districtsLayer.attr('filter', null);
   districtsLayer.each(function (d) {

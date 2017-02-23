@@ -33,6 +33,11 @@ header .map-legend {
   margin-right: 6px;
 }
 
+.map-legend select {
+  height: 30px;
+  font-size: 1em;
+}
+
 .content {
   display: flex;
   flex: 1;
@@ -70,7 +75,7 @@ header .map-legend {
   fill: lightgray;
 }
 
-#tooltip {
+#tooltip, #hover-tooltip {
   position: absolute;
   opacity: 0;
   border: 1px solid black;
@@ -106,6 +111,10 @@ header .map-legend {
 
 .tooltip-row {
   padding: 4px;
+}
+
+.tooltip-link {
+  text-align: center;
 }
 
 .tooltip-label, .tooltip-value {
