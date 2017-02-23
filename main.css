@@ -1,0 +1,64 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.main {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+header {
+  /*background-color: blue;*/
+  border-bottom: 1px solid darkgray;
+}
+
+header h1 {
+  font-size: 1.8em;
+  margin: 0;
+  padding: 4px;
+  display: inline-block;
+}
+
+header .map-legend {
+  float: right;
+}
+
+.map-legend select, .map-legend svg {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  /*background-color: gray;*/
+
+}
+
+#map {
+  flex: 1;
+}
+
+.district {
+  stroke-width: 0.5;
+}
+
+.district.per_minorities, .district.per_free_reduced {
+  stroke: darkblue;
+}
+
+.district.rural_des {
+  stroke: darkgreen;
+}
+
+.district:not(.no-data) {
+  cursor: pointer;
+}
+
+.district.no-data {
+  stroke: darkgray;
+}

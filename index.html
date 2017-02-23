@@ -3,57 +3,20 @@
   <head>
     <meta charset="utf-8">
     <title>CO Rural Districts</title>
-    <style media="screen">
-      html, body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      .main {
-        display: flex;
-        height: 100%;
-        flex-direction: column;
-      }
-
-      header {
-        /*background-color: blue;*/
-        border-bottom: 1px solid darkgray;
-      }
-
-      header h1 {
-        font-size: 1.4em;
-        margin: 0;
-        padding: 4px;
-      }
-
-      .content {
-        display: flex;
-        flex: 1;
-        /*background-color: gray;*/
-      }
-
-      #map {
-        flex: 1;
-      }
-
-      .district {
-        stroke-width: 0.5;
-        stroke: darkblue;
-        cursor: pointer;
-      }
-
-      .district.no-data {
-        stroke: darkgray;
-      }
-
-    </style>
+    <link rel="stylesheet" type="text/css" href="./main.css"></style>
   </head>
   <body>
     <div class="main">
       <header>
         <h1>Colorado Rural School Districts</h1>
+        <section class="map-legend">
+          <select class="variable-select" name="variable-select">
+            <option value="per_minorities" selected>Percent Minorities</option>
+            <option value="per_free_reduced">Percent Free/Reduced Lunch</option>
+            <option value="rural_des">Rural Designation</option>
+          </select>
+          <svg id="map-legend" height="40" width="300"></svg>
+        </section>
       </header>
       <section class="content">
         <svg id="map" height="100%" width="100%"></svg>
@@ -66,114 +29,6 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/topojson.v2.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-
-    d3.selection.prototype.moveToFront = function() {
-      return this.each(function(){
-        this.parentNode.appendChild(this);
-      });
-    };
-
-    d3.selection.prototype.moveToBack = function() {
-        return this.each(function() {
-            var firstChild = this.parentNode.firstChild;
-            if (firstChild) {
-                this.parentNode.insertBefore(this, firstChild);
-            }
-        });
-    };
-
-
-      (function () {
-        // Set up main elements
-        const $map = $('#map');
-        const $body = $('body');
-        const svg = d3.select('svg');
-        const mapWidth = +$map.outerWidth();
-        const mapHeight = +$map.outerHeight();
-
-
-d3.queue()
-    .defer(d3.json, "./districts_with_data.topo.json")
-    .await(ready);
-
-function ready(error, districts) {
-  if (error) throw error;
-
-  const geojsonData = topojson.feature(
-    districts,
-    districts.objects[Object.keys(districts.objects)[0]]
-  );
-
-  var path = d3.geoPath()
-    .projection(d3.geoConicConformal()
-      .rotate([105.5, -39.33333333333334])
-      .fitExtent([[20,20], [mapWidth-20, mapHeight-20]], geojsonData)
-  );
-
-var x = d3.scaleLinear()
-.domain([0, 1])
-.rangeRound([0.80*$body.outerWidth(), 0.95*$body.outerWidth()]);
-
-var color = d3.scaleThreshold()
-.domain(d3.range(0.2, 1, 0.2))
-.range(d3.schemeBlues[5]);
-
-var g = svg.append("g")
-.attr("class", "key")
-.attr("transform", "translate(0,40)");
-
-g.selectAll("rect")
-.data(color.range().map(function(d) {
-d = color.invertExtent(d);
-if (d[0] == null) d[0] = x.domain()[0];
-if (d[1] == null) d[1] = x.domain()[1];
-return d;
-}))
-.enter().append("rect")
-.attr("height", 12)
-.attr("x", function(d) { return x(d[0]); })
-.attr("width", function(d) { return x(d[1]) - x(d[0]); })
-.attr("fill", function(d) { return color(d[0]); });
-
-g.append("text")
-.attr("class", "caption")
-.attr("x", x.range()[0])
-.attr("y", -6)
-.attr("fill", "#000")
-.attr("text-anchor", "start")
-.attr("font-weight", "bold")
-.text("Percent Minorities");
-
-g.call(d3.axisBottom(x)
-.tickSize(16)
-.tickFormat(function(x, i) { return `${Math.round(x*100)}%`; })
-.tickValues(color.domain()))
-.select(".domain")
-.remove();
-
-  svg.append("g")
-      .attr("class", "districts")
-    .selectAll("path")
-    .data(geojsonData.features)
-    .enter().append("path")
-      .attr("fill", function(d) {
-        let pointColor;
-        if (d.properties.per_minorities || d.properties.per_minorities === 0) {
-          pointColor = color(d.properties.per_minorities);
-        } else {
-          pointColor = 'lightgray';
-        }
-        return pointColor;
-      })
-      .attr("d", path)
-      .classed('district', true)
-      .classed('no-data', d => (!d.properties.per_minorities && d.properties.per_minorities !== 0));
-
-  svg.select('.districts').selectAll('.no-data').moveToBack();
-}
-
-      })();
-    </script>
+    <script src="./main.js"></script>
   </body>
 </html>
