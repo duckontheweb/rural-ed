@@ -31,6 +31,14 @@ d3.selection.prototype.moveToBack = function() {
             throw error;
         const geojsonData = topojson.feature(districts, districts.objects[Object.keys(districts.objects)[0]]);
 
+        const shadowFeatures = Object.assign({}, geojsonData, {
+          features: geojsonData.features.filter(d => {
+            return d.properties[initialVariable] || d.properties[initialVariable] === 0
+          })
+        });
+
+        const combinedFeatures = turf.combine(shadowFeatures);
+
         var path = d3.geoPath().projection(d3.geoConicConformal().rotate([105.5, -39.33333333333334]).fitExtent([
             [
                 20, 20
@@ -46,7 +54,7 @@ d3.selection.prototype.moveToBack = function() {
         const mapLegend = createLegend('#map-legend');
         updateLegend(mapLegend, initialVariable, color);
 
-        const districtsLayer = createMap('#map', geojsonData.features, path);
+        const districtsLayer = createMap('#map', geojsonData.features, shadowFeatures.features, path);
         const colorFunction = styleDistricts(districtsLayer, initialVariable, color);
         districtsLayer.on('mouseover', function () {
           if (d3.select(this).classed('no-data')) { return; }
@@ -56,7 +64,31 @@ d3.selection.prototype.moveToBack = function() {
         }).on('mouseout', function () {
           d3.select(this).moveToBack();
           d3.select(this).transition().attr('fill', colorFunction);
+        }).on('click', function (d) {
+          if (d3.select(this).classed('no-data')) { return ;}
+          const header = `<div class="tooltip-header"><div>${d.properties.lgname}</div> <div id="close-tooltip">&times;</div></div>`;
+          const minorityVal = (100 * d.properties.per_minorities).toLocaleString('en', {maximumFractionDigits: 2});
+          const frVal = (100 * d.properties.per_free_reduced).toLocaleString('en', {maximumFractionDigits: 2});
+          const perMinorities = `<div class="tooltip-row"><div class="tooltip-label">Percent Minorities:</div><div class="tooltip-value">${minorityVal}%</div></div>`;
+          const perFreeReduced = `<div class="tooltip-row"><div class="tooltip-label">Percent Free/Reduced Lunch:</div><div class="tooltip-value">${frVal}%</div></div>`;
+          const ruralDesignation = `<div class="tooltip-row"><div class="tooltip-label">Rural Designation:</div><div class="tooltip-value">${d.properties.rural_des}</div></div>`
+          const tooltipContent = `<div>${header}${perMinorities}${perFreeReduced}${ruralDesignation}</div>`
+
+          d3.select('#tooltip')
+            .html(tooltipContent)
+            .style('opacity', '1')
+            .style('pointer-events', 'auto')
+            .style('left', `${d3.event.pageX + 10}px`)
+            .style('top', `${d3.event.pageY}px`);
+
+          $('#close-tooltip').click(() => {
+            d3.select('#tooltip')
+            .style('opacity', 0)
+            .style('pointer-events', 'none');
+          })
         });
+
+        updateShadowLayer('#shadow-layer', combinedFeatures, path);
 
         // Add change listener for select
         $variableSelect.change(function (e) {
@@ -68,8 +100,18 @@ d3.selection.prototype.moveToBack = function() {
 
 })();
 
-function createMap(selector, features, path) {
-  return d3.select(selector).append("g").attr("class", "districts").selectAll("path").data(features).enter().append("path").attr("d", path).classed('district', true);;
+function updateShadowLayer(selector, data, path) {
+  const shadowG = d3.select(selector);
+
+  shadowG.selectAll(".shadow-features").data(data.features).enter().append("path").classed("shadow-features", true).attr("d", path).attr('fill', 'gray').attr('filter', 'url(#dropshadow)')
+}
+
+function createMap(selector, backgroundFeatures, highlighFeatures, path) {
+  const dataLayer = d3.select(selector).select('#data-layer');
+  const backgroundLayer = d3.select(selector).select('#background-layer');
+
+  backgroundLayer.selectAll('path').data(backgroundFeatures).enter().append('path').attr('d', path).classed('background-district', true);
+  return dataLayer.selectAll("path").data(highlighFeatures).enter().append("path").attr("d", path).classed('district', true);;
 }
 
 function styleDistricts(districtsLayer, attribute, colorScale) {
@@ -83,7 +125,18 @@ function styleDistricts(districtsLayer, attribute, colorScale) {
   }
   districtsLayer.attr("fill", colorFunction).classed('no-data', d => (!d.properties[attribute] && d.properties[attribute] !== 0)).classed(attribute, true);
 
-  districtsLayer.selectAll(':not(.no-data)').moveToFront();
+  districtsLayer.attr('filter', null);
+  districtsLayer.each(function (d) {
+    const noData = d3.select(this).classed('no-data');
+    if (noData) {
+      d3.select(this).moveToBack();
+    } else {
+      // d3.select(this).attr('filter', 'url(#dropshadow)')
+    }
+  })
+  // districtsLayer.selectAll(':not(.no-data)')
+  //   .attr('filter', 'url(#dropshadow)')
+  //   .moveToFront();
 
   return colorFunction;
 
@@ -112,6 +165,7 @@ function updateLegend(mapLegend, variable, colorScale) {
 
   mapLegend.selectAll("rect").remove();
   mapLegend.selectAll(".tick").remove();
+  mapLegend.selectAll('text').remove();
 
   switch(variable) {
     case 'rural_des':

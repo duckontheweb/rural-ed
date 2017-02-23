@@ -3,6 +3,7 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
 .main {
@@ -59,6 +60,73 @@ header .map-legend {
   cursor: pointer;
 }
 
-.district.no-data {
+.district.no-data, {
   stroke: darkgray;
+  fill: lightgray;
+}
+
+.background-district {
+  stroke: darkgray;
+  fill: lightgray;
+}
+
+#tooltip {
+  position: absolute;
+  opacity: 0;
+  border: 1px solid black;
+  padding: 8px;
+  top: 0;
+  left: 0;
+  background-color: white;
+  -webkit-box-shadow: 4px 4px 4px 0px rgba(133,133,133,1);
+  -moz-box-shadow: 4px 4px 4px 0px rgba(133,133,133,1);
+  box-shadow: 4px 4px 4px 0px rgba(133,133,133,1);
+  border-radius: 4px;
+}
+
+#close-tooltip {
+  display: inline-block;
+  cursor: pointer;
+  padding: 0 4px;
+  border: 1px solid lightgray;
+  border-radius: 2px;
+  float: right;
+  /*position: absolute;*/
+  /*top: 0;*/
+  /*right: 0;*/
+}
+
+#close-tooltip:hover {
+  background-color: rgba(233,233,233,0.8);
+}
+
+.tooltip-row:nth-child(even) {
+  background-color: lightgray;
+}
+
+.tooltip-row {
+  padding: 4px;
+}
+
+.tooltip-label, .tooltip-value {
+  display: inline-block;
+}
+
+.tooltip-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.tooltip-header {
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 1px solid darkgray;
+  margin-bottom: 6px;
+  position: relative;
+  padding: 4px 0;
+}
+
+.tooltip-header > div {
+  margin-right: 14px;
+  display: inline-block;
 }

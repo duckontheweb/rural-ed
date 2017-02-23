@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="./main.css"></style>
   </head>
   <body>
+    <div id="tooltip"></div>
     <div class="main">
       <header>
         <h1>Colorado Rural School Districts</h1>
@@ -19,7 +20,21 @@
         </section>
       </header>
       <section class="content">
-        <svg id="map" height="100%" width="100%"></svg>
+        <svg id="map" height="100%" width="100%">
+          <defs>
+            <filter id="dropshadow" height="130%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="2" dy="2" result="offsetblur"/>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="background-layer"></g>
+          <g id="shadow-layer"></g>
+          <g id="data-layer"></g>
+        </svg>
       </section>
     </div>
     </main>
@@ -29,6 +44,7 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/topojson.v2.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
     <script src="./main.js"></script>
   </body>
 </html>
