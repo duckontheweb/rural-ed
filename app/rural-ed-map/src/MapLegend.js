@@ -18,6 +18,17 @@ export default class MapLegend extends Component {
     })
     return <div>
       {categories}
+      <div className="map-legend-row" key="map-legend-row-no-data">
+      <div
+        style={{
+          height: this.props.symbolHeight,
+          width: this.props.symbolWidth,
+          backgroundColor: 'lightgray'
+        }}
+        className="map-legend-symbol"
+      />
+      <label className="map-legend-label">No Data</label>
+      </div>
     </div>
   }
 }
