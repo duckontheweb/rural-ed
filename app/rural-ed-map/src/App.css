@@ -16,11 +16,51 @@ html, body, #root {
   height: 100%;
 }
 
+.App .sidebar {
+    padding: 16px 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .App .sidebar > .panel {
+  /*display: flex;*/
+  flex: 1;
+
   border: 1px solid lightgray;
   border-radius: 4px;
   box-shadow: 4px 4px 8px 0px rgba(87,87,87,1);
   margin: 10px 0;
   max-height: 30%;
   overflow-y: auto;
+  font-size: 0.9em;
+}
+
+.App .sidebar > .panel-group, .App .sidebar > .district-info {
+  flex: 1;
+}
+
+.App .district-info {
+  min-height: 260px;
+}
+
+.App .district-info .district-info-title {
+  margin-top: 0;
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: left;
+}
+
+.App .district-info header {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.App .sidebar > .district-info .panel-body {
+  text-align: center
+}
+
+.App .district-info-label {
+  text-align: left;
+  font-weight: bold;
 }

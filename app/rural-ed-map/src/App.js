@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { FormGroup, ControlLabel, FormControl, Panel } from 'react-bootstrap';
+import { FormGroup, ControlLabel, FormControl, Panel, Accordion, Table } from 'react-bootstrap';
 import * as d3 from 'd3';
 import { schemeBlues } from 'd3-scale-chromatic';
 
 import './App.css';
 import MapComponent from './MapComponent';
 import MapLegend from './MapLegend';
+import DistrictInfo from './DistrictInfo';
 
 import mapData from '../public/districts_with_data.topo.json';
 
@@ -43,10 +44,12 @@ class App extends Component {
     super(props);
 
     this.state = {
-      selectedVariable: 'rural_des'
+      selectedVariable: 'rural_des',
+      selectedDistrict: null
     }
 
     this.onVariableSelect = this.onVariableSelect.bind(this);
+    this.onDistrictSelect = this.onDistrictSelect.bind(this);
   }
 
   onVariableSelect(e) {
@@ -55,7 +58,17 @@ class App extends Component {
     });
   }
 
+  onDistrictSelect(selectedDistrict) {
+    this.setState({
+      selectedDistrict
+    });
+  }
+
   render() {
+
+    const color = colorScales[this.state.selectedVariable];
+    const formatter = formatters[this.state.selectedVariable];
+
     return (
       <div className="App container-fluid">
         <div className="row">
@@ -63,47 +76,47 @@ class App extends Component {
             <MapComponent
               data={mapData}
               variable={this.state.selectedVariable}
-              colorScales={colorScales}
+              color={color}
+              onDistrictSelect={this.onDistrictSelect}
             />
           </section>
           <aside className="sidebar col-md-3">
-            <Panel className="map-controls" header={<h3>Map Controls</h3>}>
-              <FormGroup controlId="map-form-control">
-                <ControlLabel>Map Variable</ControlLabel>
-                <FormControl componentClass="select" onChange={this.onVariableSelect}>
-                  {selectOptions.map(option => {
-                    return <option
-                      key={option.value}
-                      value={option.value}
-                      selected={option.value === this.state.selectedVariable}
-                    >
-                      {option.label}
-                    </option>
-                  })}
-                </FormControl>
-              </FormGroup>
-              <FormGroup>
-                <ControlLabel>Map Legend</ControlLabel>
-                <MapLegend
-                  colorScales={colorScales}
-                  variable={this.state.selectedVariable}
-                  formatters={formatters}
-                />
-              </FormGroup>
-            </Panel>
-            <Panel className="filters" header={<h3>Filters</h3>}>
-              <section>
-                Coming Soon!
-              </section>
-            </Panel>
-            <Panel
-              className="district-info"
-              header={<h3>District Information</h3>}
-            >
-              <section>
-                Click one of the highlighted districts for more information
-              </section>
-            </Panel>
+            <Accordion defaultActiveKey="1">
+              <Panel className="map-controls" header={<h3>Map Legend</h3>} eventKey="1">
+                <FormGroup controlId="map-form-control">
+                  <FormControl
+                    componentClass="select"
+                    onChange={this.onVariableSelect}
+                    defaultValue={this.state.selectedVariable}
+                  >
+                    {selectOptions.map(option => {
+                      return <option
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    })}
+                  </FormControl>
+                </FormGroup>
+                <FormGroup>
+                  <MapLegend
+                    color={color}
+                    variable={this.state.selectedVariable}
+                    formatter={formatter}
+                  />
+                </FormGroup>
+              </Panel>
+              <Panel className="filters" header={<h3>Filters</h3>} eventKey="2">
+                <section>
+                  Coming Soon!
+                </section>
+              </Panel>
+            </Accordion>
+            <DistrictInfo
+              formatters={formatters}
+              district={this.state.selectedDistrict}
+            />
           </aside>
         </div>
       </div>

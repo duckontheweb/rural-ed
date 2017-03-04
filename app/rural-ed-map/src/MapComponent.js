@@ -22,7 +22,7 @@ d3.selection.prototype.moveToBack = function() {
 
 class MapComponent extends Component {
   render() {
-
+    console.log(this.props.data)
     // Get GeoJSON FeatureCollections and geometries
     const backgroundFeatures = topojson.feature(
       this.props.data,
@@ -50,9 +50,6 @@ class MapComponent extends Component {
       this.props.data,
       dataObject
     );
-
-    // Set the color ramp
-    const color = this.props.colorScales[this.props.variable];
 
     // Set the projection and path
     const path = d3.geoPath()
@@ -102,7 +99,7 @@ class MapComponent extends Component {
         {dataFeatures.features.map(f => {
           return <path
             key={f.properties.lgname}
-            fill={color(f.properties[this.props.variable])}
+            fill={this.props.color(f.properties[this.props.variable])}
             stroke={this.props.stroke}
             strokeWidth={this.props.strokeWidth}
             className='data-feature'
@@ -119,6 +116,7 @@ class MapComponent extends Component {
                 .attr('stroke-width', this.props.strokeWidth)
                 .attr('fill-opacity', 1)
             }}
+            onClick={() => this.props.onDistrictSelect(f)}
             d={path(f)}
           />
         })}
