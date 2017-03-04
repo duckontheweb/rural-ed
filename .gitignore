@@ -5,3 +5,5 @@ data/pdf
 data/shp
 RuralEdData
 docs
+**/npm-debug.log
+**/node_modules

@@ -1,0 +1,26 @@
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.App {
+  height: 100%;
+  position: relative;
+}
+
+.App .map-container {
+  height: 100%;
+}
+.App > .row, .App > row >  section, .App > row > aside {
+  height: 100%;
+}
+
+.App .sidebar > .panel {
+  border: 1px solid lightgray;
+  border-radius: 4px;
+  box-shadow: 4px 4px 8px 0px rgba(87,87,87,1);
+  margin: 10px 0;
+  max-height: 30%;
+  overflow-y: auto;
+}
