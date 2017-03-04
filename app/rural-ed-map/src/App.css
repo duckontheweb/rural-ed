@@ -31,17 +31,12 @@ html, body, #root {
   border-radius: 4px;
   box-shadow: 4px 4px 8px 0px rgba(87,87,87,1);
   margin: 10px 0;
-  max-height: 30%;
   overflow-y: auto;
   font-size: 0.9em;
 }
 
-.App .sidebar > .panel-group, .App .sidebar > .district-info {
-  flex: 1;
-}
-
-.App .district-info {
-  min-height: 300px;
+.App .map-controls .panel-body {
+  padding-bottom: 0;
 }
 
 .App .district-info .district-info-title {
