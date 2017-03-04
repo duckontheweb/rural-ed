@@ -75,7 +75,6 @@ class MapComponent extends Component {
       dataObject
     );
 
-    console.log(this.props.cities)
     const citiesFeatures = topojson.feature(
       this.props.cities,
       this.props.cities.objects['colorado_cities_ne.geo']
@@ -91,7 +90,6 @@ class MapComponent extends Component {
     const path = d3.geoPath()
       .projection(projection)
 
-      console.log(this.props.selectedDistrict)
     return <svg className="Map" height={this.props.containerHeight} width={this.props.containerWidth}>
       <defs>
         {/*filter for shadow effect*/}

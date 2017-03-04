@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { FormGroup, ControlLabel, FormControl, Panel, Accordion, Table } from 'react-bootstrap';
 import * as d3 from 'd3';
 import { schemeBlues } from 'd3-scale-chromatic';
+import * as topojson from 'topojson-client';
 
 import './App.css';
 import MapComponent from './MapComponent';
@@ -73,6 +74,22 @@ class App extends Component {
     const color = colorScales[this.state.selectedVariable];
     const formatter = formatters[this.state.selectedVariable];
 
+    const dataObject = Object.assign(
+      {},
+      mapData.objects.districts_with_data,
+      {
+        geometries: mapData.objects.districts_with_data.geometries.filter((o) => {
+          return o.properties[this.state.selectedVariable] ||
+            (o.properties[this.state.selectedVariable] === 0);
+        })
+      }
+    )
+    const districts = topojson.feature(
+      mapData,
+      dataObject
+    ).features;
+
+
     return (
       <div className="App container-fluid">
         <div className="row">
@@ -115,6 +132,8 @@ class App extends Component {
             <DistrictInfo
               formatters={formatters}
               district={this.state.selectedDistrict}
+              districts={districts}
+              onDistrictSelect={this.onDistrictSelect}
             />
           </aside>
         </div>
