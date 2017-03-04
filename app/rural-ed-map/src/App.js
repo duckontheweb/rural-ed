@@ -9,6 +9,7 @@ import MapLegend from './MapLegend';
 import DistrictInfo from './DistrictInfo';
 
 import mapData from '../public/districts_with_data.topo.json';
+import citiesData from '../public/colorado_cities_ne.topo.json';
 
 const selectOptions = [{
   value: 'per_minorities',
@@ -58,7 +59,10 @@ class App extends Component {
     });
   }
 
-  onDistrictSelect(selectedDistrict) {
+  onDistrictSelect(feature) {
+    const selectedDistrict = this.state.selectedDistrict &&
+      (feature.properties.gid === this.state.selectedDistrict.properties.gid) ?
+        null : feature;
     this.setState({
       selectedDistrict
     });
@@ -75,9 +79,11 @@ class App extends Component {
           <section className="map-container col-md-9">
             <MapComponent
               data={mapData}
+              cities={citiesData}
               variable={this.state.selectedVariable}
               color={color}
               onDistrictSelect={this.onDistrictSelect}
+              selectedDistrict={this.state.selectedDistrict}
             />
           </section>
           <aside className="sidebar col-md-3">

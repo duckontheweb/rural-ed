@@ -3,7 +3,6 @@ import { Table, Panel } from 'react-bootstrap';
 
 export default class DistrictInfo extends Component {
   render() {
-    console.log(this.props.district)
     const districtInfoContent = !this.props.district ?
       'Click one of the highlighted districts for more information' :<div>
         <header>
