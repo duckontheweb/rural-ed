@@ -21,6 +21,13 @@ d3.selection.prototype.moveToBack = function() {
 };
 
 class MapComponent extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      popupContent: null
+    }
+  }
 
   getStroke(feature) {
     const isSelected = !!this.props.selectedDistrict &&
@@ -90,7 +97,7 @@ class MapComponent extends Component {
     const path = d3.geoPath()
       .projection(projection)
 
-    return <svg className="Map" height={this.props.containerHeight} width={this.props.containerWidth}>
+    return <div style={{position: 'relative'}}><svg className="Map" height={this.props.containerHeight} width={this.props.containerWidth}>
       <defs>
         {/*filter for shadow effect*/}
         <filter id="dropshadow" height="130%">
@@ -143,12 +150,29 @@ class MapComponent extends Component {
                 .attr('stroke', this.props.highlightStroke)
                 .attr('stroke-width', this.props.highlightStrokeWidth)
                 .attr('fill-opacity', this.props.highlightFillOpacity);
+
+              console.log(e.pageX, e.pageY, f.properties.lgname)
+              this.setState({
+                popupContent: f.properties.lgname,
+                popupX: e.pageX,
+                popupY: e.pageY
+              })
             }}
+            // onMouseMove={(e) => {
+            //   this.setState({
+            //     popupX: e.pageX,
+            //     popupY: e.pageY
+            //   })
+            // }}
             onMouseOut={(e) => {
               d3.select(e.target)
                 .attr('stroke', this.getStroke(f))
                 .attr('stroke-width', this.getStrokeWidth(f))
                 .attr('fill-opacity', this.getFillOpacity(f))
+
+              this.setState({
+                popupContent: null
+              })
             }}
             onClick={() => this.props.onDistrictSelect(f)}
             d={path(f)}
@@ -182,6 +206,13 @@ class MapComponent extends Component {
         })}
       </g>
     </svg>
+    {this.state.popupContent && <div className="map-popup" style={{
+      top: this.state.popupY,
+      left: this.state.popupX
+    }}>
+      {this.state.popupContent}
+    </div>}
+    </div>
   }
 }
 

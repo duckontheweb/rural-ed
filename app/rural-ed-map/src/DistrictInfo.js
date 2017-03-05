@@ -23,7 +23,6 @@ export default class DistrictInfo extends Component {
   }
 
   render() {
-    // console.log(this.props.districts)
     const options = this.props.districts.map(o => o.properties);
     const districtInfoContent = <div>
         <header>
