@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormGroup, ControlLabel, FormControl, Panel, Accordion, Table } from 'react-bootstrap';
+import { FormGroup, FormControl, Panel } from 'react-bootstrap';
 import * as d3 from 'd3';
 import { schemeBlues } from 'd3-scale-chromatic';
 import * as topojson from 'topojson-client';

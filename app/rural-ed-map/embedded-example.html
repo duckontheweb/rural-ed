@@ -13,17 +13,24 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <style media="screen">
-      html, body, #rural-ed-map {
+      html, body {
         height: 100%;
         width: 100%;
         margin: 0;
         padding: 0;
       }
+      #main-content {
+        width: 1000px;
+        height: 600px;
+        margin: auto;
+      }
     </style>
     <title>Rural Education Districts</title>
   </head>
   <body>
-    <div id="rural-ed-map"></div>
+    <div id="main-content">
+      <iframe src="http://rural-ed.s3-website-us-west-2.amazonaws.com/" width="100%" height="100%"></iframe>
+    </div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
