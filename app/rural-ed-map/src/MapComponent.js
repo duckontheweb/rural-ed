@@ -151,7 +151,6 @@ class MapComponent extends Component {
                 .attr('stroke-width', this.props.highlightStrokeWidth)
                 .attr('fill-opacity', this.props.highlightFillOpacity);
 
-              console.log(e.pageX, e.pageY, f.properties.lgname)
               this.setState({
                 popupContent: f.properties.lgname,
                 popupX: e.pageX,

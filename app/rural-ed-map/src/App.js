@@ -93,7 +93,7 @@ class App extends Component {
     return (
       <div className="App container-fluid">
         <div className="row">
-          <section className="map-container col-md-9">
+          <section className="map-container col-sm-9">
             <MapComponent
               data={mapData}
               cities={citiesData}
@@ -103,7 +103,7 @@ class App extends Component {
               selectedDistrict={this.state.selectedDistrict}
             />
           </section>
-          <aside className="sidebar col-md-3">
+          <aside className="sidebar col-sm-3">
             <Panel className="map-controls" header={<h3>Map Legend</h3>} eventKey="1">
               <FormGroup controlId="map-form-control">
                 <FormControl
