@@ -58,6 +58,10 @@ export default class DistrictInfo extends Component {
               <td className="district-info-label">Total Students</td>
               <td className="district-info-value">{this.props.district.properties.total_students}</td>
             </tr>
+            <tr>
+              <td className="district-info-label">School Week</td>
+              <td className="district-info-value">{this.props.district.properties.school_week}</td>
+            </tr>
           </tbody>
         </Table>}
       </div>

@@ -12,15 +12,20 @@ import DistrictInfo from './DistrictInfo';
 import mapData from '../public/districts_with_data.topo.json';
 import citiesData from '../public/colorado_cities_ne.topo.json';
 
+console.log(mapData)
+
 const selectOptions = [{
   value: 'per_minorities',
-  label: 'Percent Minorities'
+  label: 'Percent Minorities',
 }, {
   value: 'per_free_reduced',
-  label: 'Percent Free/Reduced Lunch'
+  label: 'Percent Free/Reduced Lunch',
 }, {
   value: 'rural_des',
-  label: 'Rural Designation'
+  label: 'Rural Designation',
+}, {
+  value: 'school_week',
+  label: 'School Week',
 }];
 
 const colorScales = {
@@ -33,12 +38,16 @@ const colorScales = {
   'per_minorities': d3.scaleThreshold()
     .domain([0.2, 0.4, 0.6, 0.8, 1.0])
     .range(schemeBlues[6].slice(1)),
+  'school_week': d3.scaleOrdinal()
+    .domain(['4-day', '5-day', 'Both'])
+    .range(['#a6cee3', '#1f78b4', '#b2df8a'])
 };
 
 const formatters = {
   'rural_des': (label) => label,
   'per_free_reduced': d3.format(".0%"),
   'per_minorities': d3.format(".0%"),
+  'school_week': (label) => label,
 };
 
 class App extends Component {

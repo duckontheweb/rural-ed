@@ -4,7 +4,9 @@ export default class MapLegend extends Component {
   render() {
     const categories = this.props.color.domain().reverse().map((x, i) => {
       let rowLabel;
-      if (this.props.variable !== 'rural_des') {
+      const ordinalVariables = ['rural_des', 'school_week'];
+
+      if (ordinalVariables.indexOf(this.props.variable) === -1) {
         const lowerLabel = (i === this.props.color.domain().length - 1) ? 0 :
           this.props.color.domain().reverse()[i + 1];
         rowLabel = `${this.props.formatter(lowerLabel)}- ${this.props.formatter(x)}`
