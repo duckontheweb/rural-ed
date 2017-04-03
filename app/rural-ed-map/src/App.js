@@ -11,8 +11,7 @@ import DistrictInfo from './DistrictInfo';
 
 import mapData from '../public/districts_with_data.topo.json';
 import citiesData from '../public/colorado_cities_ne.topo.json';
-
-console.log(mapData)
+import roadsData from '../public/colorado_roads.topo.json';
 
 const selectOptions = [{
   value: 'per_minorities',
@@ -79,7 +78,6 @@ class App extends Component {
   }
 
   render() {
-
     const color = colorScales[this.state.selectedVariable];
     const formatter = formatters[this.state.selectedVariable];
 
@@ -98,21 +96,21 @@ class App extends Component {
       dataObject
     ).features;
 
-
     return (
       <div className="App container-fluid">
         <div className="row">
-          <section className="map-container col-sm-9">
+          <section className="map-container col-xs-9">
             <MapComponent
               data={mapData}
               cities={citiesData}
+              roads={roadsData}
               variable={this.state.selectedVariable}
               color={color}
               onDistrictSelect={this.onDistrictSelect}
               selectedDistrict={this.state.selectedDistrict}
             />
           </section>
-          <aside className="sidebar col-sm-3">
+          <aside className="sidebar col-xs-3">
             <Panel className="map-controls" header={<h3>Map Legend</h3>} eventKey="1">
               <FormGroup controlId="map-form-control">
                 <FormControl

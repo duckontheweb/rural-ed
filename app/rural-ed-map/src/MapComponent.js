@@ -25,7 +25,8 @@ class MapComponent extends Component {
     super(props);
 
     this.state = {
-      popupContent: null
+      popupContent: null,
+
     }
   }
 
@@ -53,49 +54,171 @@ class MapComponent extends Component {
     return  isSelected ? this.props.highlightFillOpacity : this.props.fillOpacity;
   }
 
-  render() {
-    // Get GeoJSON FeatureCollections and geometries
-    const backgroundFeatures = topojson.feature(
-      this.props.data,
-      this.props.data.objects.districts_with_data
-    );
-    const shadowFeature = topojson.merge(
-      this.props.data,
-      this.props.data.objects.districts_with_data.geometries.filter((o) => {
-        return o.properties[this.props.variable] ||
-          (o.properties[this.props.variable] === 0);
-      })
-    )
+  componentWillReceiveProps(nextProps) {
+    this.handleNewProps(nextProps);
+  }
 
-    const dataObject = Object.assign(
-      {},
-      this.props.data.objects.districts_with_data,
-      {
-        geometries: this.props.data.objects.districts_with_data.geometries.filter((o) => {
+  componentWillMount() {
+    this.handleNewProps(this.props);
+  }
+
+  handleNewProps(nextProps) {
+
+    if ((this.props.data !== nextProps.data) || (!this.props.dataPaths)) {
+      // Render background and shadow
+      const backgroundFeatures = topojson.feature(
+        this.props.data,
+        this.props.data.objects.districts_with_data
+      );
+
+      // Set the projection and path
+      const projection = d3.geoConicConformal()
+        .rotate([105.5, -39.33333333333334])
+        .fitExtent(
+          [[20, 20],[this.props.containerWidth - 20, this.props.containerHeight - 20]],
+          backgroundFeatures
+        );
+      const path = d3.geoPath()
+        .projection(projection)
+
+      const backgroundPaths = backgroundFeatures.features.map(f => {
+        return <path
+          key={f.properties.lgname}
+          fill={this.props.backgroundFill}
+          stroke={this.props.stroke}
+          strokeWidth={this.props.strokeWidth}
+          d={path(f)}
+        />
+      });
+      const shadowFeature = topojson.merge(
+        this.props.data,
+        this.props.data.objects.districts_with_data.geometries.filter((o) => {
           return o.properties[this.props.variable] ||
             (o.properties[this.props.variable] === 0);
         })
-      }
-    )
-    const dataFeatures = topojson.feature(
-      this.props.data,
-      dataObject
-    );
-
-    const citiesFeatures = topojson.feature(
-      this.props.cities,
-      this.props.cities.objects['colorado_cities_ne.geo']
-    );
-
-    // Set the projection and path
-    const projection = d3.geoConicConformal()
-      .rotate([105.5, -39.33333333333334])
-      .fitExtent(
-        [[20, 20],[this.props.containerWidth - 20, this.props.containerHeight - 20]],
-        backgroundFeatures
       );
-    const path = d3.geoPath()
-      .projection(projection)
+      const shadowPath = <path
+      key="shadow-path"
+      fill="white"
+      stroke="#474747"
+      strokeWidth="3"
+      d={path(shadowFeature)}
+      filter="url(#dropshadow)"
+      />;
+
+      // District paths
+      const dataObject = Object.assign(
+        {},
+        this.props.data.objects.districts_with_data,
+        {
+          geometries: this.props.data.objects.districts_with_data.geometries.filter((o) => {
+            return o.properties[this.props.variable] ||
+              (o.properties[this.props.variable] === 0);
+          })
+        }
+      )
+      const dataFeatures = topojson.feature(
+        this.props.data,
+        dataObject
+      );
+      const dataPaths = dataFeatures.features.map(f => {
+        return <path
+          key={f.properties.lgname}
+          fill={this.getFill(f)}
+          fillOpacity={this.getFillOpacity(f)}
+          stroke={this.getStroke(f)}
+          strokeWidth={this.getStrokeWidth(f)}
+          className='data-feature'
+          onMouseOver={(e) => {
+            d3.select(e.target)
+              .moveToFront()
+              .attr('stroke', this.props.highlightStroke)
+              .attr('stroke-width', this.props.highlightStrokeWidth)
+              .attr('fill-opacity', this.props.highlightFillOpacity);
+
+            this.setState({
+              popupContent: f.properties.lgname,
+              popupX: e.pageX,
+              popupY: e.pageY
+            })
+          }}
+          // onMouseMove={(e) => {
+          //   this.setState({
+          //     popupX: e.pageX,
+          //     popupY: e.pageY
+          //   })
+          // }}
+          onMouseOut={(e) => {
+            d3.select(e.target)
+              .attr('stroke', this.getStroke(f))
+              .attr('stroke-width', this.getStrokeWidth(f))
+              .attr('fill-opacity', this.getFillOpacity(f))
+
+            this.setState({
+              popupContent: null
+            })
+          }}
+          onClick={() => this.props.onDistrictSelect(f)}
+          d={path(f)}
+        />
+      });
+
+      const citiesFeatures = topojson.feature(
+        this.props.cities,
+        this.props.cities.objects['colorado_cities_ne.geo']
+      );
+      const cityPaths = citiesFeatures.features.map(f => {
+        return <circle
+          key={f.properties.name}
+          cx={projection(f.geometry.coordinates)[0]}
+          cy={projection(f.geometry.coordinates)[1]}
+          r="5"
+          fill="#cf5300"
+          stroke="black"
+          strokeWidth="1"
+          filter="url(#circle-dropshadow)"
+        />
+      });
+      const cityLabels = citiesFeatures.features.map(f => {
+        return <text
+          key={f.properties.name}
+          x={projection(f.geometry.coordinates)[0] + this.props.labelOffset.x}
+          y={projection(f.geometry.coordinates)[1] +
+            this.props.labelOffset.y + (f.properties.name === 'Aurora' ? 10 : 0)}
+          fill="black"
+          style={{
+            pointerEvents: 'none',
+          }}
+        >{f.properties.name}</text>
+      });
+
+      const roadsFeatures = topojson.feature(
+        this.props.roads,
+        this.props.roads.objects.highways
+      );
+      const roadPaths = roadsFeatures.features.map((f, i) => {
+        return <path
+          key={`roads-feature-${f.properties.ref}-${i}`}
+          fill='none'
+          stroke='#2400b3'
+          d={path(f)}
+        />
+      });
+
+      this.setState({
+        backgroundPaths,
+        shadowPath,
+        dataPaths,
+        roadPaths,
+        cityPaths,
+        cityLabels,
+      });
+    }
+
+  }
+
+  render() {
+    // Get GeoJSON FeatureCollections and geometries
 
     return <div style={{position: 'relative'}}><svg className="Map" height={this.props.containerHeight} width={this.props.containerWidth}>
       <defs>
@@ -115,94 +238,20 @@ class MapComponent extends Component {
         </filter>
       </defs>
       <g id="background-layer">
-      {backgroundFeatures.features.map(f => {
-        return <path
-          key={f.properties.lgname}
-          fill={this.props.backgroundFill}
-          stroke={this.props.stroke}
-          strokeWidth={this.props.strokeWidth}
-          d={path(f)}
-        />
-      })}
+      {this.state.backgroundPaths}
       </g>
       <g id="shadow-layer">
-        <path
-        key="shadow-path"
-        fill="white"
-        stroke="#474747"
-        strokeWidth="3"
-        d={path(shadowFeature)}
-        filter="url(#dropshadow)"
-        />
+        {this.state.shadowPath}
       </g>
       <g id="data-layer">
-        {dataFeatures.features.map(f => {
-          return <path
-            key={f.properties.lgname}
-            fill={this.getFill(f)}
-            fillOpacity={this.getFillOpacity(f)}
-            stroke={this.getStroke(f)}
-            strokeWidth={this.getStrokeWidth(f)}
-            className='data-feature'
-            onMouseOver={(e) => {
-              d3.select(e.target)
-                .moveToFront()
-                .attr('stroke', this.props.highlightStroke)
-                .attr('stroke-width', this.props.highlightStrokeWidth)
-                .attr('fill-opacity', this.props.highlightFillOpacity);
-
-              this.setState({
-                popupContent: f.properties.lgname,
-                popupX: e.pageX,
-                popupY: e.pageY
-              })
-            }}
-            // onMouseMove={(e) => {
-            //   this.setState({
-            //     popupX: e.pageX,
-            //     popupY: e.pageY
-            //   })
-            // }}
-            onMouseOut={(e) => {
-              d3.select(e.target)
-                .attr('stroke', this.getStroke(f))
-                .attr('stroke-width', this.getStrokeWidth(f))
-                .attr('fill-opacity', this.getFillOpacity(f))
-
-              this.setState({
-                popupContent: null
-              })
-            }}
-            onClick={() => this.props.onDistrictSelect(f)}
-            d={path(f)}
-          />
-        })}
+        {this.state.dataPaths}
       </g>
+      {<g id="roads-layer">
+        {this.state.roadPaths}
+      </g>}
       <g id="cities-layer">
-        {citiesFeatures.features.map(f => {
-          return <circle
-            key={f.properties.name}
-            cx={projection(f.geometry.coordinates)[0]}
-            cy={projection(f.geometry.coordinates)[1]}
-            r="5"
-            fill="#cf5300"
-            stroke="black"
-            strokeWidth="1"
-            filter="url(#circle-dropshadow)"
-          />
-        })}
-        {citiesFeatures.features.map(f => {
-          return <text
-            key={f.properties.name}
-            x={projection(f.geometry.coordinates)[0] + this.props.labelOffset.x}
-            y={projection(f.geometry.coordinates)[1] +
-              this.props.labelOffset.y + (f.properties.name === 'Aurora' ? 10 : 0)}
-            fill="black"
-            style={{
-              pointerEvents: 'none',
-            }}
-          >{f.properties.name}</text>
-        })}
+        {this.state.cityPaths}
+        {this.state.cityLabels}
       </g>
     </svg>
     {this.state.popupContent && <div className="map-popup" style={{
