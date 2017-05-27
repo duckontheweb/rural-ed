@@ -112,6 +112,7 @@ class App extends Component {
           </section>
           <aside className="sidebar col-xs-3">
             <Panel className="map-controls" header={<h3>Map Legend</h3>} eventKey="1">
+              <p>Select the variable you would like to view on the map.</p>
               <FormGroup controlId="map-form-control">
                 <FormControl
                   componentClass="select"

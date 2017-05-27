@@ -25,6 +25,9 @@ export default class DistrictInfo extends Component {
   render() {
     const options = this.props.districts.map(o => o.properties);
     const districtInfoContent = <div>
+      <p>
+        Type the name of a Colorado school district to view data for that district.
+      </p>
         <header>
           <h3 className="district-info-title"><Typeahead
             key={this.props.district ? `auto-complete-${this.props.district.properties.gid}` : 'none-selected'}
