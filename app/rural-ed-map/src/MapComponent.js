@@ -42,10 +42,10 @@ class MapComponent extends Component {
     return  isSelected ? this.props.highlightStrokeWidth : this.props.strokeWidth;
   }
 
-  getFill(feature) {
+  getFill(feature, variable, color) {
     const isSelected = !!this.props.selectedDistrict &&
       (feature.properties.gid === this.props.selectedDistrict.properties.gid)
-    return  isSelected ? this.props.highlightFill : this.props.color(feature.properties[this.props.variable]);
+    return  isSelected ? this.props.highlightFill : color(feature.properties[variable]);
   }
 
   getFillOpacity(feature) {
@@ -124,7 +124,7 @@ class MapComponent extends Component {
       const dataPaths = dataFeatures.features.map(f => {
         return <path
           key={f.properties.lgname}
-          fill={this.getFill(f)}
+          fill={this.getFill(f, nextProps.variable, nextProps.color)}
           fillOpacity={this.getFillOpacity(f)}
           stroke={this.getStroke(f)}
           strokeWidth={this.getStrokeWidth(f)}
